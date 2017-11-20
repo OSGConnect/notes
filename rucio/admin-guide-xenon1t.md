@@ -165,7 +165,20 @@ optional arguments:
 
 ## Troubleshooting a Rucio instance
 
+### DIDs claim to be removed but still exist in `contents` table
+Check /var/log/rucio/undertaker.log for errors such as the following:
 
+```
+2017-10-30 09:14:57,184	11215	ERROR	Undertaker(1): Got database error Database exception.
+Details: (raised as a result of Query-invoked autoflush; consider using a session.no_autoflush block if this flush is occurring prematurely) (_mysql_exceptions.IntegrityError) (1062, "Duplicate entry 'x1t_SR000-x1t_SR000_161108_0719_tpc-x1t_SR000_161108_0719_tpc-ra' for key 'PRIMARY'") [SQL: u'INSERT INTO contents_history (scope, name, child_scope, child_name, did_type, child_type, bytes, adler32, md5, guid, events, rule_evaluation, did_created_at, deleted_at, updated_at, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'] [parameters: ('x1t_SR000', 'x1t_SR000_161108_0719_tpc', 'x1t_SR000_161108_0719_tpc', 'raw', 'C', 'D', None, None, None, None, None, None, datetime.datetime(2017, 2, 23, 6, 6, 24), datetime.datetime(2017, 10, 30, 14, 14, 57, 180006), datetime.datetime(2017, 10, 19, 19, 16, 15), datetime.datetime(2017, 10, 19, 19, 15, 47))].
+```
+
+For each DID generating errors, manually delete the offending record in contents_history.
+
+```
+MariaDB [rucio]> delete from contents_history where scope='x1t_SR000' and name='x1t_SR000_161108_0719_tpc' and child_scope='x1t_SR000_161108_0719_tpc';
+Query OK, 1 row affected (0.01 sec)
+```
 
 ## Setting up a Rucio instance
 
