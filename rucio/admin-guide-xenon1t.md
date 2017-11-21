@@ -165,8 +165,9 @@ optional arguments:
 
 ## Troubleshooting a Rucio instance
 
-### DIDs claim to be removed but still exist in `contents` table
-Check /var/log/rucio/undertaker.log for errors such as the following:
+### Removing DIDs that won't die
+
+First check /var/log/rucio/undertaker.log for errors such as the following:
 
 ```
 2017-10-30 09:14:57,184	11215	ERROR	Undertaker(1): Got database error Database exception.
@@ -177,6 +178,45 @@ For each DID generating errors, manually delete the offending record in contents
 
 ```
 MariaDB [rucio]> delete from contents_history where scope='x1t_SR000' and name='x1t_SR000_161108_0719_tpc' and child_scope='x1t_SR000_161108_0719_tpc';
+Query OK, 1 row affected (0.01 sec)
+```
+
+Otherwise, verify there are no associated rules for the DID and that the DID is not properly removed by the undertaker daemon.
+```
+[jlstephen@rucio ~]$ rucio ls x1t_SR001_170608_1321_tpc:acquisition_monitor_data.pickles
++------------------------------------------------------------+--------------+
+| SCOPE:NAME                                                 | [DID TYPE]   |
+|------------------------------------------------------------+--------------|
+| x1t_SR001_170608_1321_tpc:acquisition_monitor_data.pickles | FILE         |
++------------------------------------------------------------+--------------+
+
+[jlstephen@rucio ~]$ rucio list-rules x1t_SR001_170608_1321_tpc:acquisition_monitor_data.pickles
+ID    ACCOUNT    SCOPE:NAME    STATE[OK/REPL/STUCK]    RSE_EXPRESSION    COPIES    EXPIRES (UTC)
+----  ---------  ------------  ----------------------  ----------------  --------  ---------------
+
+[jlstephen@rucio ~]$ rucio set-metadata --did x1t_SR001_170608_1321_tpc:acquisition_monitor_data.pickles --key lifetime --value 0
+
+[jlstephen@rucio ~]$ tail /var/log/rucio/undertaker.log
+...
+2017-11-20 16:24:23,374 11176   INFO    Undertaker(1): Receive 1 dids to delete
+2017-11-20 16:24:23,374 11176   INFO    Removing did x1t_SR001_170608_1321_tpc:acquisition_monitor_data.pickles (FILE)
+2017-11-20 16:24:23,382 11176   INFO    Undertaker(1): Delete 1 dids
+```
+And yet the file still exists in the catalogue
+```
+[jlstephen@rucio ~]$ rucio ls x1t_SR001_170608_1321_tpc:acquisition_monitor_data.pickles
++------------------------------------------------------------+--------------+
+| SCOPE:NAME                                                 | [DID TYPE]   |
+|------------------------------------------------------------+--------------|
+| x1t_SR001_170608_1321_tpc:acquisition_monitor_data.pickles | FILE         |
++------------------------------------------------------------+--------------+
+```
+After ensuring the DID *really* doesn't exist on disk, remove the DID manually from both the replicas and dids tables.
+```
+MariaDB [rucio]> delete from replicas where scope = 'x1t_SR001_170608_1321_tpc' and name = 'acquisition_monitor_data.pickles';
+Query OK, 1 row affected (0.01 sec)
+
+MariaDB [rucio]> delete from dids where scope = 'x1t_SR001_170608_1321_tpc' and name = 'acquisition_monitor_data.pickles';
 Query OK, 1 row affected (0.01 sec)
 ```
 
