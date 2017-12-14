@@ -123,7 +123,8 @@ optional arguments:
     * Set FTS server:
         ```
         from rucio.core.rse import add_rse_attribute
-        add_rse_attribute('CCIN2P3_USERDISK', 'fts', 'https://fts.usatlas.bnl.gov:8446')```
+        add_rse_attribute('CCIN2P3_USERDISK', 'fts', 'https://fts.usatlas.bnl.gov:8446')
+        ```
     * Changing RSE quota: `rucio-admin -a root account set-limits <account> <rse> <quota_in_bytes>`
     ```
     from rucio.core.rse import add_protocol
@@ -162,6 +163,37 @@ optional arguments:
     from rucio.core.rse import update_protocols
     update_protocols(rse="CCIN2P3_USERDISK", scheme="srm", data={'extended_attributes': {u'space_token': '', u'web_service_path': u''}}, hostname="ccsrm02.in2p3.fr", port=8443)
     ```
+
+* Change FTS server
+
+Edit the [conveyor] section in /opt/rucio/etc/rucio.cfg to point to the new FTS server.
+```
+[conveyor]
+scheme = srm,gsiftp
+transfertool = fts3
+ftshosts = https://fts.mwt2.org:8446
+cacert = /opt/rucio/etc/web/ca.crt
+usercert = /opt/rucio/etc/web/x509up
+cachedir = /opt/rucio/cache
+```
+
+Set the fts attribute on the RSEs to use the new FTS server.
+```
+for i in $(rucio-admin rse list); do
+rucio-admin rse set-attribute --rse ${i} --key fts --value https://fts.mwt2.org:8446
+rucio-admin rse set-attribute --rse ${i} --key fts_testing --value https://fts.mwt2.org:8446
+done
+```
+
+Delegate against the new FTS server and update the crontab entry.
+```
+/bin/fts-delegation-init -v -s https://fts.mwt2.org:8446 --proxy /opt/rucio/etc/web/x509up
+```
+
+Restart the rucio daemons.
+```
+/etc/init.d/supervisord restart
+```
 
 ## Troubleshooting a Rucio instance
 
