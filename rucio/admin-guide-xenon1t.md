@@ -533,3 +533,37 @@ ActiveMQ: `/opt/apache-activemq-5.13.3/bin/activemq start`
 change space for an RSE: /root/rucio/tools/probes/common/check_srm_space
 -->
 
+### Relocating the DB
+
+Stop the rucio services on rucio.mwt2.org.
+```
+# systemctl stop httpd supervisord
+```
+
+Dump the database from the old mariadb host.
+
+```
+# mysqldump --all-databases --all-tablespaces -p > ruciodb
+```
+
+Copy `ruciodb` to new host using your favorite transfer technique.
+
+Load the database on the new host.
+```
+# mysql -p < ruciodb
+```
+
+Back on rucio.mwt2.org, change /opt/rucio/etc/rucio.cfg to use the new database
+
+```
+[database]
+...
+default = mysql://rucio:rucio@192.170.227.247/rucio
+...
+```
+
+Restart httpd and supervisord
+
+```
+systemctl restart httpd supervisord
+```
