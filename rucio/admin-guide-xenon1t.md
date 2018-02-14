@@ -337,7 +337,7 @@ tools/reset_database.py
 ### Setting up Apache/HTTP Server
 
 ```
-yum -y install httpd mod_ssl mod_wsgi gridsite
+yum -y install httpd mod_ssl mod_wsgi gridsite mod_auth_kerb
 systemctl enable httpd
 rm -f /etc/httpd/conf.d/*
 cp ~/rucio/etc/web/httpd-rucio-443-py26-slc6.conf.template /etc/httpd/conf.d/rucio.conf
