@@ -273,6 +273,7 @@ yum install -y gfal2 gfal2-python
 yum install mariadb-devel mariadb-server mariadb MySQL-python
 chkconfig mariadb on
 service mariadb restart
+yum -y install supervisor
 pip install rucio
 ```
 
