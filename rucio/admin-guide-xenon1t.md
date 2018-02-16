@@ -275,6 +275,7 @@ chkconfig mariadb on
 service mariadb restart
 pip install -r path/to/rucio/pip-requires
 yum -y install supervisor
+pip install sqlalechemy>=1.0.14
 pip install rucio
 ```
 
