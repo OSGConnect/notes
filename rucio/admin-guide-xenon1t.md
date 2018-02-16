@@ -269,10 +269,11 @@ pip install --upgrade pip
 yum -y install vim gcc python-devel krb5-devel
 yum install -y memcached
 systemctl enable memcached
-yum install -y gfal2 gfal2-python
+yum install -y gfal2 gfal2-python python-fts fts-rest
 yum install mariadb-devel mariadb-server mariadb MySQL-python
 chkconfig mariadb on
 service mariadb restart
+pip install -r path/to/rucio/pip-requires
 pip install rucio
 ```
 
