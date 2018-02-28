@@ -18,6 +18,7 @@ The Rucio client is installed using pip and can be installed locally in your hom
 * Kerberos devel packages (kerberos-devel) - This is in the standard Scientific Linux repositories
 * Python devel packages (python-devel) - This is in the standard Scientific Linux repositories
 * Openssl devel packages (openssl-devel) - This is in the standard Scientific Linux repositories
+* Flask (python-flask) - This is specific for rucio version >= 1.15.0
 
 After the dependencies are satisfied the user can install the client without root priviliges. NOTE: These instructions are meant for normal user accounts that do not have root priviliges on the machine.
 
