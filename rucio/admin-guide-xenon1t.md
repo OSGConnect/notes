@@ -259,27 +259,41 @@ Query OK, 1 row affected (0.01 sec)
 This is assuming RHEL7 system:
 
 ```
-rpm -iUvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-rpm -iUvh http://mirror.grid.uchicago.edu/pub/osg/3.3/osg-3.3-el7-release-latest.rpm
-yum -y update
-yum install osg-pki-tools
-reboot
-yum install -y python-pip
-pip install --upgrade pip
-yum -y install vim gcc python-devel krb5-devel
-yum install -y memcached
-systemctl enable memcached
-yum install -y gfal2 gfal2-python python-fts fts-rest
-yum install mariadb-devel mariadb-server mariadb MySQL-python
-chkconfig mariadb on
-service mariadb restart
-pip install -r path/to/rucio/pip-requires
-yum -y install supervisor
-pip install sqlalechemy>=1.0.14
+rpm -iUvh http://mirror.grid.uchicago.edu/pub/linux/epel/epel-release-latest-7.noarch.rpm 
+rpm -iUvh http://mirror.grid.uchicago.edu/pub/osg/3.4/osg-3.4-el7-release-latest.rpm 
+yum -y update 
+yum install -y osg-pki-tools 
+yum install -y git 
+
+yum install -y python-pip vim gcc python-devel krb5-devel 
+pip install --upgrade pip 
+
+rm -rf /usr/lib/python2.7/site-packages/ipaddress* 
+rm -rf /usr/lib/python2.7/site-packages/requests*
+
+git clone https://github.com/rucio/rucio.git rucio 
+pip install --upgrade setuptools
+pip install -r rucio/tools/pip-requires 
 pip install rucio
+
+yum install -y memcached 
+systemctl enable memcached
+
+yum install -y gfal2 gfal2-python python-fts fts-rest 
+
+yum install -y mariadb-devel mariadb-server mariadb MySQL-python
+systemctl enable mariadb 
+
+yum -y install supervisor
+
+shutdown -r now
 ```
 
 ### Creating SQL Database
+
+After the mariadb server is running, run `mysql_secure_installation` to set the root password.
+
+Create the rucio user and database:
 
 ```
 mysql-->
